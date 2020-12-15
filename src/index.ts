@@ -47,7 +47,8 @@ const sleep = (ms: number) => new Promise(resolve => setTimeout(resolve, ms));
 
 const errorMessages: string[] = [];
 const ERRORS = {
-  'BUTTON': "MORE_THAN_ONE_BUTTON"
+  'BUTTON': "MORE_THAN_ONE_BUTTON",
+  'BUTTON_DNE': "NO_BUTTONS_FOUND"
 };
 
 const loop = async (counter: number) => {
@@ -74,6 +75,11 @@ const loop = async (counter: number) => {
       if (!errorMessages.includes(ERRORS['BUTTON'])) {
         errorMessages.push(ERRORS['BUTTON']);
         await sendSGMessage(`${ERRORS['BUTTON']}: ${ innerHtmls }`);
+      }
+    } else {
+      if (!errorMessages.includes(ERRORS['BUTTON_DNE'])) {
+        errorMessages.push(ERRORS['BUTTON_DNE']);
+        await sendSGMessage(`${ ERRORS['BUTTON_DNE'] }`);
       }
     }
     await sleep(500);

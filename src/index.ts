@@ -45,9 +45,14 @@ const sendMessage = async (body: string) => {
 
 const sleep = (ms: number) => new Promise(resolve => setTimeout(resolve, ms));
 
+const errorMessages: string[] = [];
+const ERRORS = {
+  'BUTTON': "MORE_THAN_ONE_BUTTON"
+};
+
 const loop = async (counter: number) => {
   if (counter === 0) {
-    await sendMessage("TESTING MESSAGING");
+    //await sendMessage("TESTING MESSAGING");
   }
   try {
     console.info(counter, 'LAUNCHING BROWSER');
@@ -57,20 +62,21 @@ const loop = async (counter: number) => {
     await page.goto(BEST_BUY_LINK);
     console.log(counter, 'NOW AT PAGE');
     await sleep(5000);
-    await page.$$eval('[data-sku-id]', buttons => {
-      if (buttons && buttons.length === 1) {
-        const checkoutButton = buttons[0];
-        if (checkoutButton.innerHTML === 'Sold Out') {
-          console.info("NOT IN STOCK");
-        } else {
-          sendMessage(`GO GO GO GO GO GO: ${BEST_BUY_LINK}`);
-        }
+    const innerHtmls = await page.$$eval('[data-sku-id]', buttons => buttons.map(button => { console.log('test'); return button.innerHTML; }));
+    if (innerHtmls.length === 1) {
+      if (innerHtmls[0] !== 'Sold Out') {
+        console.info(counter, "OH GOD ITS HAPPENING", innerHtmls[0]);
+        await sendMessage(`GO GO GO GO GO GO GO THE STATUS IS ${ innerHtmls[0] }: ${ BEST_BUY_LINK }`);
       } else {
-        console.warn("MORE THAN ONE CHECKOUT BUTTON?")
+        console.info(counter, "SORRY SIR IT IS SOLD OUT");
       }
-      return buttons;
-    });
-    await sleep(3000);
+    } else if (innerHtmls.length > 1) {
+      if (!errorMessages.includes(ERRORS['BUTTON'])) {
+        errorMessages.push(ERRORS['BUTTON']);
+        await sendSGMessage(`${ERRORS['BUTTON']}: ${ innerHtmls }`);
+      }
+    }
+    await sleep(500);
     console.info(counter, "PAGE ACTIONS FINISHED");
     await browser.close();
     console.info(counter, "BROWSER CLOSED");

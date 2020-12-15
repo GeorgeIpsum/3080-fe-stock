@@ -94,7 +94,8 @@ const main = async () => {
     await loop(counter);
     console.info(counter, `WAITING ${ TIMEOUT_LENGTH_IN_SECONDS } SECONDS FOR NEXT LAUNCH`);
     counter++;
-    if (counter % 30 === 0) {
+    // send mandatory status update every half hour
+    if (counter % (1800 / TIMEOUT_LENGTH_IN_SECONDS) === 0) {
       await sendMessage("STATUS UPDATE: YOU STILL PROLLY GOT NOTHING. SORRY FRIEND.");
     }
     setTimeout(main, TIMEOUT_LENGTH_IN_SECONDS * 1000);
